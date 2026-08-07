@@ -2,8 +2,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+import app.models
+from app.api import router
 from app.config import Base, engine
-from app import models
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,6 +17,11 @@ app = FastAPI(
     title="URL Shortener API",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+app.include_router(
+    router,
+    tags=["URL Shortener"],
 )
 
 
