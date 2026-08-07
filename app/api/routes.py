@@ -1,10 +1,15 @@
 from fastapi import APIRouter
 from fastapi import Depends
+from fastapi import HTTPException
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.config import get_db, settings
 from app.schemas import URLCreate, URLResponse
-from app.services import create_short_url
+from app.services import (
+    create_short_url,
+    get_by_short_code,
+)
 
 router = APIRouter()
 
@@ -28,4 +33,28 @@ def shorten_url(
         original_url=url.original_url,
         short_code=url.short_code,
         short_url=f"{settings.BASE_URL}/{url.short_code}",
+    )
+
+@router.get(
+    "/{short_code}",
+    status_code=307,
+)
+def redirect_url(
+    short_code: str,
+    db: Session = Depends(get_db),
+):
+
+    url = get_by_short_code(
+        db=db,
+        short_code=short_code,
+    )
+
+    if url is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Short URL not found.",
+        )
+
+    return RedirectResponse(
+        url=url.original_url,
     )

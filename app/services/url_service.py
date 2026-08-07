@@ -24,12 +24,7 @@ def create_short_url(
 
         short_code = generate_short_code()
 
-        existing = get_by_short_code(
-            db,
-            short_code,
-        )
-
-        if existing:
+        if get_by_short_code(db, short_code):
             continue
 
         url = URL(
@@ -43,6 +38,4 @@ def create_short_url(
 
         return url
 
-    raise RuntimeError(
-        "Unable to generate unique short code."
-    )
+    raise RuntimeError("Unable to generate unique short code.")
